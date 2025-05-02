@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算每日需求 - 卡路里计算器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>计算每日卡路里需求</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="calculator.html" class="active">计算每日需求</a></li>
+                    <li><a href="tracker.html">记录每日摄入</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="calculator">
+                <h2>输入您的个人信息</h2>
+                <form id="calculator-form">
+                    <div class="form-group">
+                        <label for="weight">体重 (kg):</label>
+                        <input type="number" id="weight" name="weight" required min="30" max="300" step="0.1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">年龄:</label>
+                        <input type="number" id="age" name="age" required min="15" max="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gender">性别:</label>
+                        <select id="gender" name="gender" required>
+                            <option value="male">男性</option>
+                            <option value="female">女性</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="activity">活动水平:</label>
+                        <select id="activity" name="activity" required>
+                            <option value="1.0">纯基础代谢 (不考虑活动)</option>
+                            <option value="1.2">久坐不动 (几乎不运动)</option>
+                            <option value="1.375">轻度活动 (每周轻度运动1-3天)</option>
+                            <option value="1.55" selected>中度活动 (每周中度运动3-5天)</option>
+                            <option value="1.725">高度活动 (每周剧烈运动6-7天)</option>
+                            <option value="1.9">极高活动 (每天剧烈运动或体力劳动)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="protein-ratio">蛋白质摄入倍率 (体重的倍数):</label>
+                        <input type="number" id="protein-ratio" name="protein-ratio" value="1.5" min="0.5" max="3" step="0.1">
+                        <p class="input-note">推荐范围: 1.2-2.2倍体重 (增肌期可达2倍以上，减脂期1.5-2倍)</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fat-ratio">脂肪摄入倍率 (体重的倍数):</label>
+                        <input type="number" id="fat-ratio" name="fat-ratio" value="0.75" min="0.3" max="1.5" step="0.05">
+                        <p class="input-note">推荐范围: 0.3-1倍体重 (人体必需脂肪摄入至少为0.3倍体重)</p>
+                    </div>
+
+                    <button type="submit" class="btn">计算需求</button>
+                </form>
+            </section>
+
+            <section class="results" id="results" style="display: none;">
+                <h2>您的每日营养需求</h2>
+
+                <div class="result-card">
+                    <h3>基础代谢率 (BMR)</h3>
+                    <p id="bmr-result">0</p>
+                    <p class="unit">卡路里/天</p>
+                </div>
+
+                <div class="result-card">
+                    <h3>每日目标摄入量</h3>
+                    <p id="target-calories">0</p>
+                    <p class="unit">卡路里/天</p>
+                    <p class="note">（基础代谢率 - 300卡路里）</p>
+                </div>
+
+                <div class="result-card">
+                    <h3>蛋白质需求</h3>
+                    <p id="protein-result">0</p>
+                    <p class="unit">克/天</p>
+                    <p id="protein-calories">0 卡路里</p>
+                </div>
+
+                <div class="result-card">
+                    <h3>脂肪需求</h3>
+                    <p id="fat-result">0</p>
+                    <p class="unit">克/天</p>
+                    <p id="fat-calories">0 卡路里</p>
+                </div>
+
+                <div class="result-card">
+                    <h3>碳水化合物需求</h3>
+                    <p id="carb-result">0</p>
+                    <p class="unit">克/天</p>
+                    <p id="carb-calories">0 卡路里</p>
+                </div>
+
+                <div class="summary-card">
+                    <h3>每日营养摄入总结</h3>
+                    <table>
+                        <tr>
+                            <th>营养素</th>
+                            <th>数量 (克)</th>
+                            <th>热量 (卡路里)</th>
+                            <th>百分比</th>
+                        </tr>
+                        <tr>
+                            <td>蛋白质</td>
+                            <td id="summary-protein-g">0</td>
+                            <td id="summary-protein-cal">0</td>
+                            <td id="summary-protein-pct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>脂肪</td>
+                            <td id="summary-fat-g">0</td>
+                            <td id="summary-fat-cal">0</td>
+                            <td id="summary-fat-pct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>碳水化合物</td>
+                            <td id="summary-carb-g">0</td>
+                            <td id="summary-carb-cal">0</td>
+                            <td id="summary-carb-pct">0%</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>总计</td>
+                            <td id="summary-total-g">0</td>
+                            <td id="summary-total-cal">0</td>
+                            <td>100%</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 卡路里计算器 - 保持健康生活</p>
+        </footer>
+    </div>
+
+    <script src="calculator.js"></script>
+</body>
+</html>

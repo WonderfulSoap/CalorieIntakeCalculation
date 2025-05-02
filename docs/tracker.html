@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记录每日摄入 - 卡路里计算器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>记录每日卡路里摄入</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="calculator.html">计算每日需求</a></li>
+                    <li><a href="tracker.html" class="active">记录每日摄入</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="daily-summary" id="daily-summary">
+                <h2>今日摄入总结</h2>
+
+                <div class="nutrient-summary">
+                    <div class="nutrient-card">
+                        <h3>蛋白质</h3>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar protein-bar" id="protein-progress"></div>
+                        </div>
+                        <p><span id="current-protein">0</span> / <span id="target-protein">0</span> 克</p>
+                    </div>
+
+                    <div class="nutrient-card">
+                        <h3>脂肪</h3>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar fat-bar" id="fat-progress"></div>
+                        </div>
+                        <p><span id="current-fat">0</span> / <span id="target-fat">0</span> 克</p>
+                    </div>
+
+                    <div class="nutrient-card">
+                        <h3>碳水化合物</h3>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar carb-bar" id="carb-progress"></div>
+                        </div>
+                        <p><span id="current-carbs">0</span> / <span id="target-carbs">0</span> 克</p>
+                    </div>
+                </div>
+
+                <div class="progress-container">
+                    <h3>卡路里摄入进度</h3>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="calories-progress"></div>
+                    </div>
+                    <p><span id="current-calories">0</span> / <span id="target-calories-display">0</span> 卡路里</p>
+                </div>
+            </section>
+            <section class="tracker">
+                <h2>添加食物</h2>
+                <div id="no-target-warning" class="warning" style="display: none;">
+                    <p>您还没有设置每日目标！请先前往<a href="calculator.html">计算每日需求</a>页面设置您的目标。</p>
+                </div>
+
+                <form id="food-form">
+                    <div class="form-group">
+                        <label for="protein">蛋白质 (克):</label>
+                        <input type="number" id="protein" name="protein" required min="0" step="0.1" class="nutrient-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fat">脂肪 (克):</label>
+                        <input type="number" id="fat" name="fat" required min="0" step="0.1" class="nutrient-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="carbs">碳水化合物 (克):</label>
+                        <input type="number" id="carbs" name="carbs" required min="0" step="0.1" class="nutrient-input">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="food-name">食物名称 (可选):</label>
+                        <input type="text" id="food-name" name="food-name">
+                    </div>
+
+                    <button type="submit" class="btn">添加食物</button>
+                </form>
+
+                <div class="date-selector">
+                    <label for="date-select">选择日期:</label>
+                    <input type="date" id="date-select" name="date-select">
+                </div>
+            </section>
+
+            <section class="food-list">
+                <h2>今日食物记录</h2>
+                <div id="food-groups-container">
+                    <!-- 食物分组将通过JavaScript动态生成 -->
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+        <footer>
+            <p>&copy; 2023 卡路里计算器 - 保持健康生活</p>
+        </footer>
+    </div>
+
+    <script src="numpad.js"></script>
+    <script src="tracker.js"></script>
+</body>
+</html>

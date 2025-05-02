@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡路里计算器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>卡路里计算与追踪</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html" class="active">首页</a></li>
+                    <li><a href="calculator.html">计算每日需求</a></li>
+                    <li><a href="tracker.html">记录每日摄入</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="intro">
+                <h2>欢迎使用卡路里计算与追踪工具</h2>
+                <p>这个工具可以帮助您：</p>
+                <ul>
+                    <li>计算您每日所需的卡路里摄入量</li>
+                    <li>根据您的体重计算理想的蛋白质、脂肪和碳水化合物摄入量</li>
+                    <li>记录您每日的食物摄入并计算总卡路里</li>
+                    <li>追踪您的营养摄入是否符合目标</li>
+                </ul>
+            </section>
+
+            <section class="features">
+                <div class="feature-card">
+                    <h3>计算每日需求</h3>
+                    <p>根据您的体重、年龄等信息，计算您的基础代谢率和每日营养需求。</p>
+                    <a href="calculator.html" class="btn">开始计算</a>
+                </div>
+
+                <div class="feature-card">
+                    <h3>记录每日摄入</h3>
+                    <p>记录您每天摄入的食物，计算蛋白质、脂肪和碳水化合物的总量。</p>
+                    <a href="tracker.html" class="btn">开始记录</a>
+                </div>
+            </section>
+
+            <section class="data-management">
+                <h2>数据管理</h2>
+                <p>您可以导出您的数据进行备份，或者导入之前备份的数据。</p>
+
+                <div class="data-buttons">
+                    <button id="export-data" class="btn">导出数据</button>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <button id="import-data" class="btn">导入数据</button>
+                </div>
+
+                <div id="import-result" class="message" style="display: none;"></div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 卡路里计算器 - 保持健康生活</p>
+        </footer>
+    </div>
+
+    <script src="data-manager.js"></script>
+</body>
+</html>
