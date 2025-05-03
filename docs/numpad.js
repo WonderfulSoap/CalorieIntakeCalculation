@@ -249,20 +249,24 @@ class Numpad {
             if (this.nextInput) {
                 this.nextInput.focus();
 
-                // If the next input is a nutrient input, open the numpad for it
-                if (this.nextInput.classList.contains('nutrient-input')) {
+                // 只有当当前输入是蛋白质或脂肪时，才自动打开下一个数字键盘
+                if (this.currentInput.id === 'protein' || this.currentInput.id === 'fat' ||
+                    this.currentInput.id === 'food-lib-protein' || this.currentInput.id === 'food-lib-fat') {
+
                     let nextLabel = '';
 
-                    // Determine the label for the next input
-                    if (this.nextInput.id === 'protein') {
-                        nextLabel = '蛋白质';
-                    } else if (this.nextInput.id === 'fat') {
+                    // 确定下一个输入框的标签
+                    if (this.nextInput.id === 'fat') {
                         nextLabel = '脂肪';
                     } else if (this.nextInput.id === 'carbs') {
                         nextLabel = '碳水化合物';
+                    } else if (this.nextInput.id === 'food-lib-fat') {
+                        nextLabel = '脂肪';
+                    } else if (this.nextInput.id === 'food-lib-carbs') {
+                        nextLabel = '碳水化合物';
                     }
 
-                    // Find the next input after this one
+                    // 找到下一个输入框之后的输入框
                     const inputs = document.querySelectorAll('.nutrient-input');
                     let nextInputIndex = -1;
 
@@ -277,19 +281,16 @@ class Numpad {
 
                     if (nextInputIndex !== -1 && nextInputIndex < inputs.length - 1) {
                         nextNextInput = inputs[nextInputIndex + 1];
-                    } else if (nextInputIndex === inputs.length - 1) {
-                        // If it's the last nutrient input, the next input is the food name
-                        nextNextInput = document.getElementById('food-name');
                     }
 
-                    // Open the numpad for the next input
+                    // 为下一个输入框打开数字键盘
                     this.open(this.nextInput, nextNextInput, nextLabel);
                     return;
                 }
             }
         }
 
-        // Close the numpad
+        // 关闭数字键盘
         this.close();
     }
 }

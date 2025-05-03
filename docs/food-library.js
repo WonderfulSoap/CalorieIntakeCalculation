@@ -125,7 +125,7 @@ function setupNumpadInputs() {
                 nextInput = document.getElementById('food-lib-carbs');
                 label = '脂肪';
             } else if (input.id === 'food-lib-carbs') {
-                nextInput = document.getElementById('food-lib-name');
+                nextInput = null; // 不设置下一个输入框，因为food-lib-name不是数字输入框
                 label = '碳水化合物';
             }
 

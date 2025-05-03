@@ -238,6 +238,7 @@ function setupNumpadInputs() {
                 nextInput = document.getElementById('food-name');
                 label = '碳水化合物';
             } else if (input.id === 'food-amount') {
+                nextInput = null; // 明确设置为null，表示没有下一个输入框
                 label = '摄入量';
             }
 
@@ -556,19 +557,6 @@ function addFoodEntry() {
     // Focus protein input
     const proteinInput = document.getElementById('protein');
     proteinInput.focus();
-
-    // 确保输入字段被清空，并在短暂延迟后打开数字键盘
-    setTimeout(() => {
-        // 再次清空输入字段，确保它们真的被清空
-        clearAllInputs();
-
-        // 打开数字键盘（如果可用）
-        if (numpad && typeof numpad.open === 'function') {
-            numpad.open(proteinInput, document.getElementById('fat'), '蛋白质');
-        } else {
-            console.warn('数字键盘不可用，无法打开');
-        }
-    }, 100);
 }
 
 /**
@@ -985,6 +973,12 @@ function clearDayEntries(date) {
 function updateTotals() {
     const date = dateSelect.value;
 
+    // 初始化变量（在try块外部定义，以便在整个函数范围内可用）
+    let totalProtein = 0;
+    let totalFat = 0;
+    let totalCarbs = 0;
+    let totalCalories = 0;
+
     try {
         // 安全地解析 localStorage 数据
         const foodEntriesStr = localStorage.getItem('foodEntries');
@@ -994,11 +988,6 @@ function updateTotals() {
             console.error('无效的食物条目数据:', foodEntries);
             return;
         }
-
-        let totalProtein = 0;
-        let totalFat = 0;
-        let totalCarbs = 0;
-        let totalCalories = 0;
 
         // Calculate totals
         if (foodEntries[date] && Array.isArray(foodEntries[date])) {
@@ -1015,14 +1004,9 @@ function updateTotals() {
                 totalCalories += typeof entry.calories === 'number' ? entry.calories : 0;
             });
         }
-    } catch (error) {
-        console.error('计算总计时出错:', error);
-        return;
-    }
 
-    // 这些元素在HTML中不存在，所以我们不再尝试更新它们
-    // 相关信息已经在updateDailySummary函数中更新
-    try {
+        // 这些元素在HTML中不存在，所以我们不再尝试更新它们
+        // 相关信息已经在updateDailySummary函数中更新
         console.log('当前总计:', {
             protein: totalProtein ? totalProtein.toFixed(1) : '0.0',
             fat: totalFat ? totalFat.toFixed(1) : '0.0',
@@ -1030,7 +1014,7 @@ function updateTotals() {
             calories: totalCalories || 0
         });
     } catch (error) {
-        console.error('记录总计时出错:', error);
+        console.error('计算总计时出错:', error);
     }
 }
 
