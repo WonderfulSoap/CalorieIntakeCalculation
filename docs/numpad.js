@@ -10,6 +10,12 @@ class Numpad {
         this.display = null;
         this.inputLabel = '';
 
+        // 计算器状态
+        this.firstOperand = null;
+        this.operator = null;
+        this.waitForSecondOperand = false;
+        this.calculationMode = false;
+
         // Create the numpad elements
         this.createNumpad();
 
@@ -95,17 +101,67 @@ class Numpad {
         enterKey.textContent = '确认';
         enterKey.addEventListener('click', () => this.confirm());
 
+        // 创建运算符按钮（竖排放在右侧）
+        const operatorsContainer = document.createElement('div');
+        operatorsContainer.className = 'numpad-operators';
+
+        // 加法按钮
+        const addKey = document.createElement('button');
+        addKey.className = 'numpad-key operator add';
+        addKey.textContent = '+';
+        addKey.addEventListener('click', () => this.handleOperator('+'));
+        operatorsContainer.appendChild(addKey);
+
+        // 减法按钮
+        const subtractKey = document.createElement('button');
+        subtractKey.className = 'numpad-key operator subtract';
+        subtractKey.textContent = '-';
+        subtractKey.addEventListener('click', () => this.handleOperator('-'));
+        operatorsContainer.appendChild(subtractKey);
+
+        // 乘法按钮
+        const multiplyKey = document.createElement('button');
+        multiplyKey.className = 'numpad-key operator multiply';
+        multiplyKey.textContent = '×';
+        multiplyKey.addEventListener('click', () => this.handleOperator('*'));
+        operatorsContainer.appendChild(multiplyKey);
+
+        // 除法按钮
+        const divideKey = document.createElement('button');
+        divideKey.className = 'numpad-key operator divide';
+        divideKey.textContent = '÷';
+        divideKey.addEventListener('click', () => this.handleOperator('/'));
+        operatorsContainer.appendChild(divideKey);
+
+        // 等于按钮
+        const equalsKey = document.createElement('button');
+        equalsKey.className = 'numpad-key operator equals';
+        equalsKey.textContent = '=';
+        equalsKey.addEventListener('click', () => this.calculate());
+        operatorsContainer.appendChild(equalsKey);
+
         // Add special keys
         keys.appendChild(zeroKey);
         keys.appendChild(decimalKey);
         keys.appendChild(backspaceKey);
         keys.appendChild(clearKey); // 将删除键和C键放在数字0和小数点的下面
-        keys.appendChild(enterKey);
+
+        // 创建数字键盘和运算符的容器
+        const keypadContainer = document.createElement('div');
+        keypadContainer.className = 'numpad-keypad-container';
+        keypadContainer.appendChild(keys);
+        keypadContainer.appendChild(operatorsContainer);
+
+        // 创建底部确认按钮容器
+        const bottomContainer = document.createElement('div');
+        bottomContainer.className = 'numpad-bottom-container';
+        bottomContainer.appendChild(enterKey);
 
         // Assemble the numpad
         container.appendChild(header);
         container.appendChild(this.display);
-        container.appendChild(keys);
+        container.appendChild(keypadContainer); // 添加包含数字键盘和运算符的容器
+        container.appendChild(bottomContainer); // 添加底部确认按钮容器
         this.overlay.appendChild(container);
 
         // Add to document
@@ -191,14 +247,27 @@ class Numpad {
      * Add a digit to the current value
      */
     addDigit(digit) {
+        // 如果处于等待第二操作数状态，先清空显示
+        if (this.waitForSecondOperand) {
+            this.currentValue = '';
+            this.waitForSecondOperand = false;
+        }
+
         this.currentValue += digit;
         this.display.value = this.currentValue;
+        this.calculationMode = true; // 进入计算模式
     }
 
     /**
      * Add a decimal point to the current value
      */
     addDecimal() {
+        // 如果处于等待第二操作数状态，先重置显示
+        if (this.waitForSecondOperand) {
+            this.currentValue = '0';
+            this.waitForSecondOperand = false;
+        }
+
         // Only add decimal if there isn't one already
         if (!this.currentValue.includes('.')) {
             // If the current value is empty, add a leading zero
@@ -208,6 +277,8 @@ class Numpad {
             this.currentValue += '.';
             this.display.value = this.currentValue;
         }
+
+        this.calculationMode = true; // 进入计算模式
     }
 
     /**
@@ -224,6 +295,11 @@ class Numpad {
     clearInput() {
         this.currentValue = '';
         this.display.value = '';
+
+        // 重置计算器状态
+        this.firstOperand = null;
+        this.operator = null;
+        this.waitForSecondOperand = false;
     }
 
     /**
@@ -231,6 +307,11 @@ class Numpad {
      */
     confirm() {
         if (this.currentInput) {
+            // 如果在计算模式下且有未完成的计算，先执行计算
+            if (this.calculationMode && this.operator && !this.waitForSecondOperand) {
+                this.calculate();
+            }
+
             // Parse the value as a float
             let value = parseFloat(this.currentValue);
 
@@ -244,6 +325,12 @@ class Numpad {
 
             // Trigger change event
             this.currentInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+            // 重置计算器状态
+            this.calculationMode = false;
+            this.firstOperand = null;
+            this.operator = null;
+            this.waitForSecondOperand = false;
 
             // Focus the next input if provided
             if (this.nextInput) {
@@ -292,5 +379,155 @@ class Numpad {
 
         // 关闭数字键盘
         this.close();
+    }
+
+    /**
+     * 处理运算符
+     */
+    handleOperator(op) {
+        // 如果当前值为空，不处理运算符
+        if (this.currentValue === '') {
+            return;
+        }
+
+        // 将当前值转换为数字
+        const inputValue = parseFloat(this.currentValue);
+
+        // 如果已经有一个运算符和第一个操作数，并且不是在等待第二个操作数
+        // 说明用户连续点击了多个运算符，需要先计算前面的结果
+        if (this.operator && this.firstOperand !== null && !this.waitForSecondOperand) {
+            this.calculate();
+        }
+
+        // 保存第一个操作数和运算符
+        if (this.firstOperand === null) {
+            this.firstOperand = inputValue;
+        }
+
+        this.operator = op;
+        this.waitForSecondOperand = true;
+        this.calculationMode = true;
+    }
+
+    /**
+     * 执行计算
+     */
+    calculate() {
+        // 如果没有运算符或第一个操作数，不执行计算
+        if (this.operator === null || this.firstOperand === null) {
+            return;
+        }
+
+        // 获取第二个操作数
+        const secondOperand = parseFloat(this.currentValue);
+
+        // 如果第二个操作数无效，不执行计算
+        if (isNaN(secondOperand)) {
+            return;
+        }
+
+        // 执行计算
+        let result = 0;
+        switch (this.operator) {
+            case '+':
+                result = this.firstOperand + secondOperand;
+                break;
+            case '-':
+                result = this.firstOperand - secondOperand;
+                break;
+            case '*':
+                result = this.firstOperand * secondOperand;
+                break;
+            case '/':
+                // 防止除以零
+                if (secondOperand === 0) {
+                    alert('不能除以零');
+                    return;
+                }
+                result = this.firstOperand / secondOperand;
+                break;
+        }
+
+        // 更新显示和当前值
+        this.currentValue = result.toString();
+        this.display.value = this.currentValue;
+
+        // 重置计算状态，为下一次计算做准备
+        this.firstOperand = result;
+        this.waitForSecondOperand = true;
+    }
+
+    /**
+     * 添加键盘事件监听，支持运算符输入
+     */
+    addEventListeners() {
+        document.addEventListener('keydown', (e) => {
+            if (!this.overlay || this.overlay.style.display === 'none') {
+                return;
+            }
+
+            // Handle number keys
+            if (/^[0-9]$/.test(e.key)) {
+                e.preventDefault();
+                this.addDigit(parseInt(e.key));
+            }
+
+            // Handle decimal point
+            if (e.key === '.' || e.key === ',') {
+                e.preventDefault();
+                this.addDecimal();
+            }
+
+            // Handle backspace
+            if (e.key === 'Backspace') {
+                e.preventDefault();
+                this.backspace();
+            }
+
+            // Handle clear (C key)
+            if (e.key === 'c' || e.key === 'C') {
+                e.preventDefault();
+                this.clearInput();
+            }
+
+            // Handle enter
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.confirm();
+            }
+
+            // Handle escape
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.close();
+            }
+
+            // 处理运算符
+            if (e.key === '+') {
+                e.preventDefault();
+                this.handleOperator('+');
+            }
+
+            if (e.key === '-') {
+                e.preventDefault();
+                this.handleOperator('-');
+            }
+
+            if (e.key === '*') {
+                e.preventDefault();
+                this.handleOperator('*');
+            }
+
+            if (e.key === '/') {
+                e.preventDefault();
+                this.handleOperator('/');
+            }
+
+            // 处理等号（不重复处理Enter键，因为上面已经处理过了）
+            if (e.key === '=') {
+                e.preventDefault();
+                this.calculate();
+            }
+        });
     }
 }

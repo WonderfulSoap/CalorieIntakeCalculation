@@ -559,8 +559,10 @@ th {
     background-color: white;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 300px;
+    width: 360px; /* 增加宽度以容纳运算符按钮 */
     padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .numpad-header {
@@ -594,10 +596,31 @@ th {
     margin-bottom: 15px;
 }
 
+/* 数字键盘和运算符的容器 */
+.numpad-keypad-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .numpad-keys {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+    flex: 1;
+}
+
+/* 运算符按钮容器 */
+.numpad-operators {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-left: 10px; /* 与数字键盘之间的间距 */
+}
+
+/* 底部确认按钮容器 */
+.numpad-bottom-container {
+    margin-top: 10px;
 }
 
 .numpad-key {
@@ -633,7 +656,7 @@ th {
 .numpad-key.enter {
     background-color: #4CAF50;
     color: white;
-    grid-column: 1 / 4;
+    width: 100%;
 }
 
 .numpad-key.enter:hover {
@@ -656,6 +679,26 @@ th {
 
 .numpad-key.clear:hover {
     background-color: #ffeeba;
+}
+
+/* 运算符按钮样式 */
+.numpad-key.operator {
+    background-color: #e9ecef;
+    color: #212529;
+    font-weight: bold;
+}
+
+.numpad-key.operator:hover {
+    background-color: #dee2e6;
+}
+
+.numpad-key.operator.equals {
+    background-color: #007bff;
+    color: white;
+}
+
+.numpad-key.operator.equals:hover {
+    background-color: #0069d9;
 }
 
 /* 页脚样式 */
