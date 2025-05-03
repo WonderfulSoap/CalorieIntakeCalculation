@@ -96,10 +96,10 @@ class Numpad {
         enterKey.addEventListener('click', () => this.confirm());
 
         // Add special keys
-        keys.appendChild(backspaceKey);
-        keys.appendChild(clearKey); // 将C键放到删除键的右边
         keys.appendChild(zeroKey);
         keys.appendChild(decimalKey);
+        keys.appendChild(backspaceKey);
+        keys.appendChild(clearKey); // 将删除键和C键放在数字0和小数点的下面
         keys.appendChild(enterKey);
 
         // Assemble the numpad

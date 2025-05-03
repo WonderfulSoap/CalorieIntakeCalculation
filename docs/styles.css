@@ -622,6 +622,14 @@ th {
     font-weight: bold;
 }
 
+.numpad-key.backspace {
+    grid-column: 1 / 2;
+}
+
+.numpad-key.clear {
+    grid-column: 2 / 4;
+}
+
 .numpad-key.enter {
     background-color: #4CAF50;
     color: white;
@@ -639,6 +647,15 @@ th {
 
 .numpad-key.backspace:hover {
     background-color: #f5c6cb;
+}
+
+.numpad-key.clear {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.numpad-key.clear:hover {
+    background-color: #ffeeba;
 }
 
 /* 页脚样式 */
