@@ -13,11 +13,43 @@ const noTargetWarning = document.getElementById('no-target-warning');
 // Current date in YYYY-MM-DD format
 const today = new Date().toISOString().split('T')[0];
 
-// Create numpad instance
-const numpad = new Numpad();
+// 创建数字键盘实例
+// 将在 initializeApp 函数中初始化
+let numpad;
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * 清空所有输入字段的函数
+ */
+function clearAllInputs() {
+    console.log('清空所有输入字段');
+    // 使用表单重置
+    foodForm.reset();
+
+    // 显式清空每个字段
+    document.getElementById('protein').value = '';
+    document.getElementById('fat').value = '';
+    document.getElementById('carbs').value = '';
+    document.getElementById('food-name').value = '';
+
+    // 记录清空后的值，用于调试
+    console.log('清空后的值：', {
+        protein: document.getElementById('protein').value,
+        fat: document.getElementById('fat').value,
+        carbs: document.getElementById('carbs').value,
+        foodName: document.getElementById('food-name').value
+    });
+}
+
+// 主要的初始化函数
+function initializeApp() {
+    try {
+        // 尝试创建 Numpad 实例
+        numpad = new Numpad();
+        console.log('数字键盘初始化成功');
+    } catch (error) {
+        console.error('数字键盘初始化失败:', error);
+    }
+
     // Set date input to today
     dateSelect.value = today;
 
@@ -37,6 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
     foodForm.addEventListener('submit', (e) => {
         e.preventDefault();
         addFoodEntry();
+
+        // 确保表单重置并清空所有输入字段
+        clearAllInputs();
     });
 
     // Set up date change
@@ -45,17 +80,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Set up clear day button
-    clearDayBtn.addEventListener('click', () => {
-        if (confirm('确定要清除当天的所有食物记录吗？')) {
-            clearDayEntries(dateSelect.value);
-        }
-    });
-});
+    const clearDayBtn = document.getElementById('clear-day');
+    if (clearDayBtn) {
+        clearDayBtn.addEventListener('click', () => {
+            if (confirm('确定要清除当天的所有食物记录吗？')) {
+                clearDayEntries(dateSelect.value);
+            }
+        });
+    } else {
+        console.warn('清除当天记录按钮不存在');
+    }
+
+    // 设置清空输入按钮
+    const clearBtn = document.getElementById('clear-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            clearAllInputs();
+        });
+    }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', initializeApp);
 
 /**
  * Set up numpad for nutrient inputs
  */
 function setupNumpadInputs() {
+    // 如果 numpad 实例不存在，则不设置
+    if (!numpad) {
+        console.warn('数字键盘实例不存在，无法设置输入');
+        return;
+    }
+
     const inputs = document.querySelectorAll('.nutrient-input');
 
     inputs.forEach((input) => {
@@ -80,7 +137,11 @@ function setupNumpadInputs() {
             }
 
             // Open numpad for this input
-            numpad.open(input, nextInput, label);
+            if (numpad && typeof numpad.open === 'function') {
+                numpad.open(input, nextInput, label);
+            } else {
+                console.error('数字键盘实例不可用或 open 方法不存在');
+            }
         });
     });
 }
@@ -138,9 +199,23 @@ function checkNutritionTargets() {
  */
 function addFoodEntry() {
     let foodName = document.getElementById('food-name').value;
-    const protein = parseFloat(document.getElementById('protein').value);
-    const fat = parseFloat(document.getElementById('fat').value);
-    const carbs = parseFloat(document.getElementById('carbs').value);
+
+    // 获取输入值并确保它们是有效的数字
+    let proteinValue = document.getElementById('protein').value;
+    let fatValue = document.getElementById('fat').value;
+    let carbsValue = document.getElementById('carbs').value;
+
+    // 解析为数字，如果无效则默认为0
+    const protein = proteinValue ? parseFloat(proteinValue) || 0 : 0;
+    const fat = fatValue ? parseFloat(fatValue) || 0 : 0;
+    const carbs = carbsValue ? parseFloat(carbsValue) || 0 : 0;
+
+    // 检查是否所有值都为0，如果是则不添加食物
+    if (protein === 0 && fat === 0 && carbs === 0) {
+        console.warn('所有营养值都为0或无效，不添加食物');
+        return;
+    }
+
     const date = dateSelect.value;
 
     // 如果食物名称为空，使用默认名称
@@ -181,16 +256,24 @@ function addFoodEntry() {
     updateTotals();
     updateDailySummary();
 
-    // Reset form
-    foodForm.reset();
+    // 清空所有输入字段
+    clearAllInputs();
 
-    // Focus protein input and open numpad
+    // Focus protein input
     const proteinInput = document.getElementById('protein');
     proteinInput.focus();
 
-    // Open numpad for protein input
+    // 确保输入字段被清空，并在短暂延迟后打开数字键盘
     setTimeout(() => {
-        numpad.open(proteinInput, document.getElementById('fat'), '蛋白质');
+        // 再次清空输入字段，确保它们真的被清空
+        clearAllInputs();
+
+        // 打开数字键盘（如果可用）
+        if (numpad && typeof numpad.open === 'function') {
+            numpad.open(proteinInput, document.getElementById('fat'), '蛋白质');
+        } else {
+            console.warn('数字键盘不可用，无法打开');
+        }
     }, 100);
 }
 
@@ -216,17 +299,10 @@ function saveFoodEntry(foodEntry) {
 /**
  * Add food entry to UI
  * This function is no longer used directly - entries are now grouped
+ * 保留此注释作为历史参考，但移除未使用的函数
+ *
+ * 现在我们使用 loadFoodEntriesGrouped 函数来显示分组的食物条目
  */
-function addFoodEntryToUI(foodEntry) {
-    // This function is kept for reference but no longer used directly
-    // Instead, we use loadFoodEntriesGrouped
-
-    // Update totals
-    updateTotals();
-
-    // Update daily summary
-    updateDailySummary();
-}
 
 /**
  * Load food entries for a specific date
@@ -252,109 +328,140 @@ function loadFoodEntries(date) {
  * Group food entries by hour and display them
  */
 function loadFoodEntriesGrouped(entries, date) {
-    // Sort entries by timestamp
-    entries.sort((a, b) => a.timestamp - b.timestamp);
+    try {
+        // 确保 entries 是数组
+        if (!Array.isArray(entries)) {
+            console.error('无效的食物条目数组:', entries);
+            return;
+        }
 
-    // Group entries by hour
-    const groupedEntries = {};
-    const hourLabels = {};
+        // 过滤掉无效的条目
+        const validEntries = entries.filter(entry => entry && typeof entry === 'object');
 
-    entries.forEach(entry => {
-        // Handle entries that might not have timestamp (backward compatibility)
-        let entryDate;
-        let hour;
+        if (validEntries.length === 0) {
+            console.warn('没有有效的食物条目');
+            return;
+        }
 
-        if (entry.timestamp) {
-            // Use existing timestamp
-            entryDate = new Date(entry.timestamp);
-        } else {
-            // Create a timestamp from the ID if possible, or use current time
-            const timestamp = typeof entry.id === 'number' ? entry.id : Date.now();
-            entryDate = new Date(timestamp);
+        // Sort entries by timestamp
+        validEntries.sort((a, b) => {
+            const timestampA = typeof a.timestamp === 'number' ? a.timestamp : 0;
+            const timestampB = typeof b.timestamp === 'number' ? b.timestamp : 0;
+            return timestampA - timestampB;
+        });
 
-            // Add timestamp to entry for future use
-            entry.timestamp = timestamp;
+        // Group entries by hour
+        const groupedEntries = {};
+        const hourLabels = {};
 
-            // Add formatted time string if missing
-            if (!entry.time) {
-                entry.time = entryDate.toLocaleTimeString();
+        validEntries.forEach(entry => {
+            try {
+                // Handle entries that might not have timestamp (backward compatibility)
+                let entryDate;
+                let hour;
+
+                if (entry.timestamp) {
+                    // Use existing timestamp
+                    entryDate = new Date(entry.timestamp);
+                } else {
+                    // Create a timestamp from the ID if possible, or use current time
+                    const timestamp = typeof entry.id === 'number' ? entry.id : Date.now();
+                    entryDate = new Date(timestamp);
+
+                    // Add timestamp to entry for future use
+                    entry.timestamp = timestamp;
+
+                    // Add formatted time string if missing
+                    if (!entry.time) {
+                        entry.time = entryDate.toLocaleTimeString();
+                    }
+                }
+
+                // Extract hour
+                hour = entryDate.getHours();
+
+                // Create hour key (0-23)
+                const hourKey = hour;
+
+                // Create hour label (e.g., "早上 8-9点")
+                let timeLabel;
+                if (hour >= 5 && hour < 9) {
+                    timeLabel = `早上 ${hour}-${hour+1}点`;
+                } else if (hour >= 9 && hour < 11) {
+                    timeLabel = `上午 ${hour}-${hour+1}点`;
+                } else if (hour >= 11 && hour < 13) {
+                    timeLabel = `中午 ${hour}-${hour+1}点`;
+                } else if (hour >= 13 && hour < 17) {
+                    timeLabel = `下午 ${hour}-${hour+1}点`;
+                } else if (hour >= 17 && hour < 19) {
+                    timeLabel = `傍晚 ${hour}-${hour+1}点`;
+                } else if (hour >= 19 && hour < 23) {
+                    timeLabel = `晚上 ${hour}-${hour+1}点`;
+                } else {
+                    timeLabel = `深夜 ${hour}-${hour+1}点`;
+                }
+
+                // Initialize group if it doesn't exist
+                if (!groupedEntries[hourKey]) {
+                    groupedEntries[hourKey] = [];
+                    hourLabels[hourKey] = timeLabel;
+                }
+
+                // Add entry to group
+                groupedEntries[hourKey].push(entry);
+            } catch (error) {
+                console.error('处理食物条目时出错:', error, entry);
             }
-        }
+        });
 
-        // Extract hour
-        hour = entryDate.getHours();
+        // Get all group totals first
+        const allGroupTotals = {};
+        Object.keys(groupedEntries).forEach(key => {
+            allGroupTotals[key] = calculateGroupTotals(groupedEntries[key]);
+        });
 
-        // Create hour key (0-23)
-        const hourKey = hour;
+        // Create groups in UI - 按照时间降序排列
+        Object.keys(groupedEntries).sort((a, b) => parseInt(b) - parseInt(a)).forEach(hourKey => {
+            try {
+                const groupEntries = groupedEntries[hourKey];
+                const timeLabel = hourLabels[hourKey];
 
-        // Create hour label (e.g., "早上 8-9点")
-        let timeLabel;
-        if (hour >= 5 && hour < 9) {
-            timeLabel = `早上 ${hour}-${hour+1}点`;
-        } else if (hour >= 9 && hour < 11) {
-            timeLabel = `上午 ${hour}-${hour+1}点`;
-        } else if (hour >= 11 && hour < 13) {
-            timeLabel = `中午 ${hour}-${hour+1}点`;
-        } else if (hour >= 13 && hour < 17) {
-            timeLabel = `下午 ${hour}-${hour+1}点`;
-        } else if (hour >= 17 && hour < 19) {
-            timeLabel = `傍晚 ${hour}-${hour+1}点`;
-        } else if (hour >= 19 && hour < 23) {
-            timeLabel = `晚上 ${hour}-${hour+1}点`;
-        } else {
-            timeLabel = `深夜 ${hour}-${hour+1}点`;
-        }
+                // Get the group totals we already calculated
+                const groupTotals = allGroupTotals[hourKey];
 
-        // Initialize group if it doesn't exist
-        if (!groupedEntries[hourKey]) {
-            groupedEntries[hourKey] = [];
-            hourLabels[hourKey] = timeLabel;
-        }
+                // Get nutrition targets from localStorage
+                const nutritionDataStr = localStorage.getItem('nutritionData');
+                const nutritionData = nutritionDataStr ? JSON.parse(nutritionDataStr) : null;
+                let targetProtein = 0;
+                let targetFat = 0;
+                let targetCarbs = 0;
+                let targetCalories = 0;
 
-        // Add entry to group
-        groupedEntries[hourKey].push(entry);
-    });
+                // If nutrition targets exist, use them for percentage calculations
+                if (nutritionData && nutritionData.calculations) {
+                    targetProtein = nutritionData.calculations.proteinGrams || 0;
+                    targetFat = nutritionData.calculations.fatGrams || 0;
+                    targetCarbs = nutritionData.calculations.carbGrams || 0;
+                    targetCalories = nutritionData.calculations.targetCalories || 0;
+                }
 
-    // Get all group totals first
-    const allGroupTotals = {};
-    Object.keys(groupedEntries).forEach(key => {
-        allGroupTotals[key] = calculateGroupTotals(groupedEntries[key]);
-    });
+                // Calculate percentages relative to daily targets (safely handle division by zero)
+                const percentages = {
+                    protein: targetProtein > 0 ? Math.round((groupTotals.protein / targetProtein) * 100) : 0,
+                    fat: targetFat > 0 ? Math.round((groupTotals.fat / targetFat) * 100) : 0,
+                    carbs: targetCarbs > 0 ? Math.round((groupTotals.carbs / targetCarbs) * 100) : 0,
+                    calories: targetCalories > 0 ? Math.round((groupTotals.calories / targetCalories) * 100) : 0
+                };
 
-    // Create groups in UI
-    Object.keys(groupedEntries).sort((a, b) => parseInt(a) - parseInt(b)).forEach(hourKey => {
-        const groupEntries = groupedEntries[hourKey];
-        const timeLabel = hourLabels[hourKey];
-
-        // Get the group totals we already calculated
-        const groupTotals = allGroupTotals[hourKey];
-
-        // Get nutrition targets from localStorage
-        const nutritionData = JSON.parse(localStorage.getItem('nutritionData'));
-        let targetProtein = 0;
-        let targetFat = 0;
-        let targetCarbs = 0;
-        let targetCalories = 0;
-
-        // If nutrition targets exist, use them for percentage calculations
-        if (nutritionData && nutritionData.calculations) {
-            targetProtein = nutritionData.calculations.proteinGrams || 0;
-            targetFat = nutritionData.calculations.fatGrams || 0;
-            targetCarbs = nutritionData.calculations.carbGrams || 0;
-            targetCalories = nutritionData.calculations.targetCalories || 0;
-        }
-
-        // Calculate percentages relative to daily targets (safely handle division by zero)
-        const percentages = {
-            protein: targetProtein > 0 ? Math.round((groupTotals.protein / targetProtein) * 100) : 0,
-            fat: targetFat > 0 ? Math.round((groupTotals.fat / targetFat) * 100) : 0,
-            carbs: targetCarbs > 0 ? Math.round((groupTotals.carbs / targetCarbs) * 100) : 0,
-            calories: targetCalories > 0 ? Math.round((groupTotals.calories / targetCalories) * 100) : 0
-        };
-
-        // Create group element
-        createFoodGroup(timeLabel, groupEntries, groupTotals, percentages, date);
-    });
+                // Create group element
+                createFoodGroup(timeLabel, groupEntries, groupTotals, percentages, date);
+            } catch (error) {
+                console.error('创建食物组时出错:', error);
+            }
+        });
+    } catch (error) {
+        console.error('加载食物条目时出错:', error);
+    }
 }
 
 /**
@@ -366,11 +473,22 @@ function calculateGroupTotals(entries) {
     let carbs = 0;
     let calories = 0;
 
+    if (!Array.isArray(entries)) {
+        console.error('无效的食物条目数组:', entries);
+        return { protein, fat, carbs, calories };
+    }
+
     entries.forEach(entry => {
-        protein += entry.protein;
-        fat += entry.fat;
-        carbs += entry.carbs;
-        calories += entry.calories;
+        if (!entry || typeof entry !== 'object') {
+            console.warn('跳过无效的食物条目:', entry);
+            return;
+        }
+
+        // 确保所有属性都是有效的数字
+        protein += typeof entry.protein === 'number' ? entry.protein : 0;
+        fat += typeof entry.fat === 'number' ? entry.fat : 0;
+        carbs += typeof entry.carbs === 'number' ? entry.carbs : 0;
+        calories += typeof entry.calories === 'number' ? entry.calories : 0;
     });
 
     return { protein, fat, carbs, calories };
@@ -385,11 +503,22 @@ function calculateDailyTotals(entries) {
     let carbs = 0;
     let calories = 0;
 
+    if (!Array.isArray(entries)) {
+        console.error('无效的食物条目数组:', entries);
+        return { protein, fat, carbs, calories };
+    }
+
     entries.forEach(entry => {
-        protein += entry.protein;
-        fat += entry.fat;
-        carbs += entry.carbs;
-        calories += entry.calories;
+        if (!entry || typeof entry !== 'object') {
+            console.warn('跳过无效的食物条目:', entry);
+            return;
+        }
+
+        // 确保所有属性都是有效的数字
+        protein += typeof entry.protein === 'number' ? entry.protein : 0;
+        fat += typeof entry.fat === 'number' ? entry.fat : 0;
+        carbs += typeof entry.carbs === 'number' ? entry.carbs : 0;
+        calories += typeof entry.calories === 'number' ? entry.calories : 0;
     });
 
     return { protein, fat, carbs, calories };
@@ -435,18 +564,31 @@ function createFoodGroup(timeLabel, entries, totals, percentages, date) {
     // Add entries to table
     const tbody = table.querySelector('tbody');
     entries.forEach(entry => {
+        // 确保条目有效
+        if (!entry || typeof entry !== 'object') {
+            console.error('无效的食物条目:', entry);
+            return;
+        }
+
         const row = document.createElement('tr');
-        row.setAttribute('data-id', entry.id);
+        row.setAttribute('data-id', entry.id || '');
+
+        // 确保所有属性都有有效值
+        const name = entry.name || '未命名食物';
+        const protein = typeof entry.protein === 'number' ? entry.protein : 0;
+        const fat = typeof entry.fat === 'number' ? entry.fat : 0;
+        const carbs = typeof entry.carbs === 'number' ? entry.carbs : 0;
+        const calories = typeof entry.calories === 'number' ? entry.calories : 0;
 
         // Ensure time is available or use a placeholder
         const displayTime = entry.time || '未记录时间';
 
         row.innerHTML = `
-            <td>${entry.name}</td>
-            <td>${entry.protein.toFixed(1)}</td>
-            <td>${entry.fat.toFixed(1)}</td>
-            <td>${entry.carbs.toFixed(1)}</td>
-            <td>${entry.calories}</td>
+            <td>${name}</td>
+            <td>${protein.toFixed(1)}</td>
+            <td>${fat.toFixed(1)}</td>
+            <td>${carbs.toFixed(1)}</td>
+            <td>${calories}</td>
             <td>${displayTime}</td>
             <td>
                 <button class="btn btn-danger btn-sm delete-btn">删除</button>
@@ -548,79 +690,131 @@ function clearDayEntries(date) {
  */
 function updateTotals() {
     const date = dateSelect.value;
-    const foodEntries = JSON.parse(localStorage.getItem('foodEntries')) || {};
 
-    let totalProtein = 0;
-    let totalFat = 0;
-    let totalCarbs = 0;
-    let totalCalories = 0;
+    try {
+        // 安全地解析 localStorage 数据
+        const foodEntriesStr = localStorage.getItem('foodEntries');
+        const foodEntries = foodEntriesStr ? JSON.parse(foodEntriesStr) : {};
 
-    // Calculate totals
-    if (foodEntries[date]) {
-        foodEntries[date].forEach(entry => {
-            totalProtein += entry.protein;
-            totalFat += entry.fat;
-            totalCarbs += entry.carbs;
-            totalCalories += entry.calories;
-        });
+        if (!foodEntries || typeof foodEntries !== 'object') {
+            console.error('无效的食物条目数据:', foodEntries);
+            return;
+        }
+
+        let totalProtein = 0;
+        let totalFat = 0;
+        let totalCarbs = 0;
+        let totalCalories = 0;
+
+        // Calculate totals
+        if (foodEntries[date] && Array.isArray(foodEntries[date])) {
+            foodEntries[date].forEach(entry => {
+                if (!entry || typeof entry !== 'object') {
+                    console.warn('跳过无效的食物条目:', entry);
+                    return;
+                }
+
+                // 确保所有属性都是有效的数字
+                totalProtein += typeof entry.protein === 'number' ? entry.protein : 0;
+                totalFat += typeof entry.fat === 'number' ? entry.fat : 0;
+                totalCarbs += typeof entry.carbs === 'number' ? entry.carbs : 0;
+                totalCalories += typeof entry.calories === 'number' ? entry.calories : 0;
+            });
+        }
+    } catch (error) {
+        console.error('计算总计时出错:', error);
+        return;
     }
 
-    // Update UI
-    document.getElementById('total-protein').textContent = totalProtein.toFixed(1);
-    document.getElementById('total-fat').textContent = totalFat.toFixed(1);
-    document.getElementById('total-carbs').textContent = totalCarbs.toFixed(1);
-    document.getElementById('total-calories').textContent = totalCalories;
+    // 这些元素在HTML中不存在，所以我们不再尝试更新它们
+    // 相关信息已经在updateDailySummary函数中更新
+    try {
+        console.log('当前总计:', {
+            protein: totalProtein ? totalProtein.toFixed(1) : '0.0',
+            fat: totalFat ? totalFat.toFixed(1) : '0.0',
+            carbs: totalCarbs ? totalCarbs.toFixed(1) : '0.0',
+            calories: totalCalories || 0
+        });
+    } catch (error) {
+        console.error('记录总计时出错:', error);
+    }
 }
 
 /**
  * Update daily summary with progress bars
  */
 function updateDailySummary() {
-    // Check if targets exist
-    if (!checkNutritionTargets()) {
-        return;
+    try {
+        // Check if targets exist
+        if (!checkNutritionTargets()) {
+            return;
+        }
+
+        // 安全地获取营养目标
+        const nutritionDataStr = localStorage.getItem('nutritionData');
+        if (!nutritionDataStr) {
+            console.warn('未找到营养目标数据');
+            return;
+        }
+
+        const nutritionData = JSON.parse(nutritionDataStr);
+        if (!nutritionData || !nutritionData.calculations) {
+            console.warn('营养目标数据无效:', nutritionData);
+            return;
+        }
+
+        const targets = nutritionData.calculations;
+
+        // 安全地获取食物条目
+        const date = dateSelect.value;
+        const foodEntriesStr = localStorage.getItem('foodEntries');
+        const foodEntries = foodEntriesStr ? JSON.parse(foodEntriesStr) : {};
+
+        if (!foodEntries || typeof foodEntries !== 'object') {
+            console.error('无效的食物条目数据:', foodEntries);
+            return;
+        }
+
+        let currentProtein = 0;
+        let currentFat = 0;
+        let currentCarbs = 0;
+        let currentCalories = 0;
+
+        if (foodEntries[date] && Array.isArray(foodEntries[date])) {
+            foodEntries[date].forEach(entry => {
+                if (!entry || typeof entry !== 'object') {
+                    console.warn('跳过无效的食物条目:', entry);
+                    return;
+                }
+
+                // 确保所有属性都是有效的数字
+                currentProtein += typeof entry.protein === 'number' ? entry.protein : 0;
+                currentFat += typeof entry.fat === 'number' ? entry.fat : 0;
+                currentCarbs += typeof entry.carbs === 'number' ? entry.carbs : 0;
+                currentCalories += typeof entry.calories === 'number' ? entry.calories : 0;
+            });
+        }
+        // Update progress bars
+        const caloriesProgress = (currentCalories / targets.targetCalories) * 100;
+        document.getElementById('calories-progress').style.width = `${Math.min(caloriesProgress, 100)}%`;
+        document.getElementById('current-calories').textContent = currentCalories;
+        document.getElementById('target-calories-display').textContent = targets.targetCalories;
+
+        const proteinProgress = (currentProtein / targets.proteinGrams) * 100;
+        document.getElementById('protein-progress').style.width = `${Math.min(proteinProgress, 100)}%`;
+        document.getElementById('current-protein').textContent = currentProtein.toFixed(1);
+        document.getElementById('target-protein').textContent = targets.proteinGrams;
+
+        const fatProgress = (currentFat / targets.fatGrams) * 100;
+        document.getElementById('fat-progress').style.width = `${Math.min(fatProgress, 100)}%`;
+        document.getElementById('current-fat').textContent = currentFat.toFixed(1);
+        document.getElementById('target-fat').textContent = targets.fatGrams;
+
+        const carbProgress = (currentCarbs / targets.carbGrams) * 100;
+        document.getElementById('carb-progress').style.width = `${Math.min(carbProgress, 100)}%`;
+        document.getElementById('current-carbs').textContent = currentCarbs.toFixed(1);
+        document.getElementById('target-carbs').textContent = targets.carbGrams;
+    } catch (error) {
+        console.error('更新每日摘要时出错:', error);
     }
-
-    // Get nutrition targets
-    const nutritionData = JSON.parse(localStorage.getItem('nutritionData'));
-    const targets = nutritionData.calculations;
-
-    // Get current totals
-    const date = dateSelect.value;
-    const foodEntries = JSON.parse(localStorage.getItem('foodEntries')) || {};
-
-    let currentProtein = 0;
-    let currentFat = 0;
-    let currentCarbs = 0;
-    let currentCalories = 0;
-
-    if (foodEntries[date]) {
-        foodEntries[date].forEach(entry => {
-            currentProtein += entry.protein;
-            currentFat += entry.fat;
-            currentCarbs += entry.carbs;
-            currentCalories += entry.calories;
-        });
-    }
-
-    // Update progress bars
-    const caloriesProgress = (currentCalories / targets.targetCalories) * 100;
-    document.getElementById('calories-progress').style.width = `${Math.min(caloriesProgress, 100)}%`;
-    document.getElementById('current-calories').textContent = currentCalories;
-    document.getElementById('target-calories-display').textContent = targets.targetCalories;
-
-    const proteinProgress = (currentProtein / targets.proteinGrams) * 100;
-    document.getElementById('protein-progress').style.width = `${Math.min(proteinProgress, 100)}%`;
-    document.getElementById('current-protein').textContent = currentProtein.toFixed(1);
-    document.getElementById('target-protein').textContent = targets.proteinGrams;
-
-    const fatProgress = (currentFat / targets.fatGrams) * 100;
-    document.getElementById('fat-progress').style.width = `${Math.min(fatProgress, 100)}%`;
-    document.getElementById('current-fat').textContent = currentFat.toFixed(1);
-    document.getElementById('target-fat').textContent = targets.fatGrams;
-
-    const carbProgress = (currentCarbs / targets.carbGrams) * 100;
-    document.getElementById('carb-progress').style.width = `${Math.min(carbProgress, 100)}%`;
-    document.getElementById('current-carbs').textContent = currentCarbs.toFixed(1);
-    document.getElementById('target-carbs').textContent = targets.carbGrams;
 }
