@@ -1,0 +1,167 @@
+[
+  {
+    "id": "default-1",
+    "name": "鸡胸肉",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 23.1,
+    "fat": 1.2,
+    "carbs": 0.0,
+    "calories": 109,
+    "isDefault": true
+  },
+  {
+    "id": "default-2",
+    "name": "鸡蛋",
+    "unit": "个",
+    "nutritionBase": 1,
+    "protein": 6.3,
+    "fat": 5.0,
+    "carbs": 0.6,
+    "calories": 72,
+    "isDefault": true
+  },
+  {
+    "id": "default-3",
+    "name": "牛奶",
+    "unit": "ml",
+    "nutritionBase": 100,
+    "protein": 3.4,
+    "fat": 3.6,
+    "carbs": 4.8,
+    "calories": 64,
+    "isDefault": true
+  },
+  {
+    "id": "default-4",
+    "name": "白米饭",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 2.6,
+    "fat": 0.3,
+    "carbs": 28.2,
+    "calories": 130,
+    "isDefault": true
+  },
+  {
+    "id": "default-5",
+    "name": "全麦面包",
+    "unit": "片",
+    "nutritionBase": 1,
+    "protein": 3.6,
+    "fat": 1.1,
+    "carbs": 15.0,
+    "calories": 81,
+    "isDefault": true
+  },
+  {
+    "id": "default-6",
+    "name": "苹果",
+    "unit": "个",
+    "nutritionBase": 1,
+    "protein": 0.3,
+    "fat": 0.2,
+    "carbs": 14.0,
+    "calories": 52,
+    "isDefault": true
+  },
+  {
+    "id": "default-7",
+    "name": "香蕉",
+    "unit": "个",
+    "nutritionBase": 1,
+    "protein": 1.1,
+    "fat": 0.2,
+    "carbs": 22.8,
+    "calories": 89,
+    "isDefault": true
+  },
+  {
+    "id": "default-8",
+    "name": "三文鱼",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 20.0,
+    "fat": 13.0,
+    "carbs": 0.0,
+    "calories": 208,
+    "isDefault": true
+  },
+  {
+    "id": "default-9",
+    "name": "牛肉(瘦)",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 26.0,
+    "fat": 11.0,
+    "carbs": 0.0,
+    "calories": 250,
+    "isDefault": true
+  },
+  {
+    "id": "default-10",
+    "name": "豆腐",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 8.1,
+    "fat": 4.2,
+    "carbs": 1.7,
+    "calories": 76,
+    "isDefault": true
+  },
+  {
+    "id": "default-11",
+    "name": "花生酱",
+    "unit": "勺",
+    "nutritionBase": 1,
+    "protein": 4.0,
+    "fat": 8.0,
+    "carbs": 3.0,
+    "calories": 94,
+    "isDefault": true
+  },
+  {
+    "id": "default-12",
+    "name": "橄榄油",
+    "unit": "ml",
+    "nutritionBase": 100,
+    "protein": 0.0,
+    "fat": 100.0,
+    "carbs": 0.0,
+    "calories": 884,
+    "isDefault": true
+  },
+  {
+    "id": "default-13",
+    "name": "燕麦片",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 13.2,
+    "fat": 6.9,
+    "carbs": 67.7,
+    "calories": 389,
+    "isDefault": true
+  },
+  {
+    "id": "default-14",
+    "name": "西兰花",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 2.8,
+    "fat": 0.4,
+    "carbs": 6.6,
+    "calories": 34,
+    "isDefault": true
+  },
+  {
+    "id": "default-15",
+    "name": "菠菜",
+    "unit": "g",
+    "nutritionBase": 100,
+    "protein": 2.9,
+    "fat": 0.4,
+    "carbs": 3.6,
+    "calories": 23,
+    "isDefault": true
+  }
+]

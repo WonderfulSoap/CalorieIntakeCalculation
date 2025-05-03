@@ -15,6 +15,7 @@
                     <li><a href="index.html">首页</a></li>
                     <li><a href="calculator.html">计算每日需求</a></li>
                     <li><a href="tracker.html" class="active">记录每日摄入</a></li>
+                    <li><a href="food-library.html">食物库</a></li>
                 </ul>
             </nav>
         </header>
@@ -63,30 +64,74 @@
                     <p>您还没有设置每日目标！请先前往<a href="calculator.html">计算每日需求</a>页面设置您的目标。</p>
                 </div>
 
-                <form id="food-form">
-                    <div class="form-group">
-                        <label for="protein">蛋白质 (克):</label>
-                        <input type="number" id="protein" name="protein" required min="0" step="0.1" class="nutrient-input">
+                <div class="input-container">
+                    <div class="tabs">
+                        <button class="tab-btn active" id="manual-tab">手动输入</button>
+                        <button class="tab-btn" id="library-tab">从食物库选择</button>
                     </div>
 
-                    <div class="form-group">
-                        <label for="fat">脂肪 (克):</label>
-                        <input type="number" id="fat" name="fat" required min="0" step="0.1" class="nutrient-input">
+                    <div id="manual-input" class="tab-content">
+                        <form id="food-form">
+                            <div class="form-group">
+                                <label for="protein">蛋白质 (克):</label>
+                                <input type="number" id="protein" name="protein" required min="0" step="0.1" class="nutrient-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fat">脂肪 (克):</label>
+                                <input type="number" id="fat" name="fat" required min="0" step="0.1" class="nutrient-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carbs">碳水化合物 (克):</label>
+                                <input type="number" id="carbs" name="carbs" required min="0" step="0.1" class="nutrient-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="food-name">食物名称 (可选):</label>
+                                <input type="text" id="food-name" name="food-name">
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn">添加食物</button>
+                                <button type="button" id="clear-btn" class="btn btn-secondary">清空输入</button>
+                            </div>
+                        </form>
                     </div>
 
-                    <div class="form-group">
-                        <label for="carbs">碳水化合物 (克):</label>
-                        <input type="number" id="carbs" name="carbs" required min="0" step="0.1" class="nutrient-input">
-                    </div>
+                    <div id="library-input" class="tab-content" style="display: none;">
+                        <form id="library-food-form">
+                            <div class="form-group">
+                                <label for="food-select">选择食物:</label>
+                                <select id="food-select" name="food-select" required>
+                                    <option value="">-- 请选择食物 --</option>
+                                    <!-- 食物选项将通过JavaScript动态生成 -->
+                                </select>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="food-name">食物名称 (可选):</label>
-                        <input type="text" id="food-name" name="food-name">
-                    </div>
+                            <div class="form-group">
+                                <label for="food-amount">摄入量:</label>
+                                <input type="number" id="food-amount" name="food-amount" required min="0" step="0.1" class="nutrient-input">
+                                <span id="food-unit">克</span>
+                            </div>
 
-                    <button type="submit" class="btn">添加食物</button>
-                    <button type="button" id="clear-btn" class="btn btn-secondary">清空输入</button>
-                </form>
+                            <div class="nutrition-preview">
+                                <h4>营养成分预览</h4>
+                                <div class="preview-content">
+                                    <p>蛋白质: <span id="preview-protein">0</span> 克</p>
+                                    <p>脂肪: <span id="preview-fat">0</span> 克</p>
+                                    <p>碳水: <span id="preview-carbs">0</span> 克</p>
+                                    <p>卡路里: <span id="preview-calories">0</span></p>
+                                </div>
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn">添加食物</button>
+                                <button type="button" id="clear-library-btn" class="btn btn-secondary">清空输入</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
                 <div class="date-selector">
                     <label for="date-select">选择日期:</label>

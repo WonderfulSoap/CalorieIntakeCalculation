@@ -631,6 +631,222 @@ footer {
     font-size: 14px;
 }
 
+/* 食物库样式 */
+.food-library-intro {
+    margin-bottom: 30px;
+}
+
+.add-food {
+    margin-bottom: 30px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.form-group.half {
+    flex: 1;
+}
+
+.food-library-list {
+    margin-top: 30px;
+}
+
+.library-container {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.search-container {
+    margin-bottom: 20px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s;
+}
+
+.search-container input:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.food-library-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.food-library-table th,
+.food-library-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.food-library-table th {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: 600;
+}
+
+.food-library-table tr:last-child td {
+    border-bottom: none;
+}
+
+.food-library-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.food-library-table .btn-sm {
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+/* 预定义食物样式 */
+.food-library-table tr.default-food {
+    background-color: #e8f5e9;
+}
+
+.food-library-table tr.default-food:hover {
+    background-color: #c8e6c9;
+}
+
+.food-library-table .btn-secondary {
+    background-color: #6c757d;
+}
+
+.food-library-table .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.food-library-table .btn-secondary[disabled] {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.empty-library {
+    text-align: center;
+    padding: 30px;
+    color: #6c757d;
+    font-style: italic;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* 标签样式 */
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    color: #6c757d;
+    transition: all 0.3s;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.tab-btn:hover {
+    color: #4CAF50;
+    background-color: #f1f1f1;
+}
+
+.tab-btn.active {
+    color: white;
+    background-color: #4CAF50;
+    font-weight: 600;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid white;
+}
+
+.input-container {
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tab-content {
+    padding: 25px;
+    background-color: white;
+    border-radius: 0 0 8px 8px;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+}
+
+.form-buttons .btn {
+    min-width: 120px;
+}
+
+/* 营养预览样式 */
+.nutrition-preview {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.nutrition-preview h4 {
+    margin-top: 0;
+    color: #4CAF50;
+    margin-bottom: 10px;
+}
+
+.preview-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.preview-content p {
+    margin: 5px 0;
+}
+
 /* 响应式设计 */
 @media (max-width: 768px) {
     .container {
@@ -673,5 +889,9 @@ footer {
 
     th, td {
         padding: 8px;
+    }
+
+    .preview-content {
+        grid-template-columns: 1fr;
     }
 }

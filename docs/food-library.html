@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食物库 - 卡路里计算器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>自定义食物库</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">首页</a></li>
+                    <li><a href="calculator.html">计算每日需求</a></li>
+                    <li><a href="tracker.html">记录每日摄入</a></li>
+                    <li><a href="food-library.html" class="active">食物库</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main>
+            <section class="food-library-intro">
+                <h2>自定义食物库</h2>
+                <p>在这里添加您经常食用的食物，方便在记录每日摄入时快速选择。</p>
+            </section>
+
+            <section class="add-food">
+                <h2>添加新食物</h2>
+                <div class="input-container">
+                    <div class="tab-content">
+                        <form id="food-library-form">
+                            <div class="form-group">
+                                <label for="food-lib-name">食物名称:</label>
+                                <input type="text" id="food-lib-name" name="food-lib-name" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group half">
+                                    <label for="food-unit">单位:</label>
+                                    <select id="food-unit" name="food-unit">
+                                        <option value="g">克 (g)</option>
+                                        <option value="ml">毫升 (ml)</option>
+                                        <option value="个">个</option>
+                                        <option value="份">份</option>
+                                        <option value="勺">勺</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-group half">
+                                    <label for="nutrition-base">营养成分基准:</label>
+                                    <select id="nutrition-base" name="nutrition-base">
+                                        <option value="100">每100单位</option>
+                                        <option value="1">每1单位</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="food-lib-protein">蛋白质 (克):</label>
+                                <input type="number" id="food-lib-protein" name="food-lib-protein" required min="0" step="0.1" class="nutrient-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="food-lib-fat">脂肪 (克):</label>
+                                <input type="number" id="food-lib-fat" name="food-lib-fat" required min="0" step="0.1" class="nutrient-input">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="food-lib-carbs">碳水化合物 (克):</label>
+                                <input type="number" id="food-lib-carbs" name="food-lib-carbs" required min="0" step="0.1" class="nutrient-input">
+                            </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn">添加到食物库</button>
+                                <button type="button" id="clear-food-form" class="btn btn-secondary">清空输入</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <section class="food-library-list">
+                <h2>我的食物库</h2>
+                <div class="search-container">
+                    <input type="text" id="food-search" placeholder="搜索食物...">
+                </div>
+                <div class="library-container">
+                    <div id="food-library-container">
+                        <!-- 食物列表将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>&copy; 2023 卡路里计算器 - 保持健康生活</p>
+        </footer>
+    </div>
+
+    <script src="numpad.js"></script>
+    <script src="food-library.js"></script>
+</body>
+</html>

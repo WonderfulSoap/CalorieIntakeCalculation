@@ -3,12 +3,30 @@ const PROTEIN_CALORIES_PER_GRAM = 4;
 const FAT_CALORIES_PER_GRAM = 9;
 const CARB_CALORIES_PER_GRAM = 4;
 
+// Default food library path
+const DEFAULT_FOOD_LIBRARY_PATH = 'default-food-library.json';
+
+// 存储预定义食物库
+let defaultFoodLibrary = [];
+
 // DOM Elements
 const foodForm = document.getElementById('food-form');
+const libraryFoodForm = document.getElementById('library-food-form');
 const foodGroupsContainer = document.getElementById('food-groups-container');
 const dateSelect = document.getElementById('date-select');
 const clearDayBtn = document.getElementById('clear-day');
 const noTargetWarning = document.getElementById('no-target-warning');
+const manualTab = document.getElementById('manual-tab');
+const libraryTab = document.getElementById('library-tab');
+const manualInput = document.getElementById('manual-input');
+const libraryInput = document.getElementById('library-input');
+const foodSelect = document.getElementById('food-select');
+const foodAmount = document.getElementById('food-amount');
+const foodUnit = document.getElementById('food-unit');
+const previewProtein = document.getElementById('preview-protein');
+const previewFat = document.getElementById('preview-fat');
+const previewCarbs = document.getElementById('preview-carbs');
+const previewCalories = document.getElementById('preview-calories');
 
 // Current date in YYYY-MM-DD format
 const today = new Date().toISOString().split('T')[0];
@@ -18,7 +36,7 @@ const today = new Date().toISOString().split('T')[0];
 let numpad;
 
 /**
- * 清空所有输入字段的函数
+ * 清空手动输入表单的所有输入字段
  */
 function clearAllInputs() {
     console.log('清空所有输入字段');
@@ -40,8 +58,51 @@ function clearAllInputs() {
     });
 }
 
+/**
+ * 清空食物库选择表单的所有输入字段
+ */
+function clearLibraryInputs() {
+    console.log('清空食物库选择表单');
+    // 使用表单重置
+    libraryFoodForm.reset();
+
+    // 显式清空摄入量字段
+    document.getElementById('food-amount').value = '';
+
+    // 重置预览
+    updateNutritionPreview();
+}
+
+/**
+ * 加载预定义食物库
+ */
+async function loadDefaultFoodLibrary() {
+    try {
+        // 使用fetch API加载预定义食物库JSON文件
+        const response = await fetch(DEFAULT_FOOD_LIBRARY_PATH);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        // 解析JSON数据
+        const data = await response.json();
+
+        // 存储预定义食物库
+        defaultFoodLibrary = data;
+
+        console.log('预定义食物库加载成功，共加载', defaultFoodLibrary.length, '个食物');
+
+        return true;
+    } catch (error) {
+        console.error('加载预定义食物库失败:', error);
+        defaultFoodLibrary = [];
+        return false;
+    }
+}
+
 // 主要的初始化函数
-function initializeApp() {
+async function initializeApp() {
     try {
         // 尝试创建 Numpad 实例
         numpad = new Numpad();
@@ -59,19 +120,31 @@ function initializeApp() {
     // Load food entries for today
     loadFoodEntries(today);
 
+    // 加载预定义食物库
+    await loadDefaultFoodLibrary();
+
+    // Load food library for dropdown
+    loadFoodLibraryOptions();
+
     // Set up numpad for nutrient inputs
     setupNumpadInputs();
 
     // Set up form submission with Enter key navigation
     setupFormNavigation();
 
-    // Set up form submission
+    // Set up form submission for manual input
     foodForm.addEventListener('submit', (e) => {
         e.preventDefault();
         addFoodEntry();
 
         // 确保表单重置并清空所有输入字段
         clearAllInputs();
+    });
+
+    // Set up form submission for library input
+    libraryFoodForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        addFoodFromLibrary();
     });
 
     // Set up date change
@@ -98,6 +171,36 @@ function initializeApp() {
             clearAllInputs();
         });
     }
+
+    // 设置清空食物库选择表单按钮
+    const clearLibraryBtn = document.getElementById('clear-library-btn');
+    if (clearLibraryBtn) {
+        clearLibraryBtn.addEventListener('click', () => {
+            clearLibraryInputs();
+        });
+    }
+
+    // 设置标签切换
+    manualTab.addEventListener('click', () => {
+        manualTab.classList.add('active');
+        libraryTab.classList.remove('active');
+        manualInput.style.display = 'block';
+        libraryInput.style.display = 'none';
+    });
+
+    libraryTab.addEventListener('click', () => {
+        libraryTab.classList.add('active');
+        manualTab.classList.remove('active');
+        libraryInput.style.display = 'block';
+        manualInput.style.display = 'none';
+    });
+
+    // 设置食物选择变化事件
+    foodSelect.addEventListener('change', updateNutritionPreview);
+
+    // 设置摄入量变化事件
+    foodAmount.addEventListener('change', updateNutritionPreview);
+    foodAmount.addEventListener('input', updateNutritionPreview);
 }
 
 // Event Listeners
@@ -134,6 +237,8 @@ function setupNumpadInputs() {
             } else if (input.id === 'carbs') {
                 nextInput = document.getElementById('food-name');
                 label = '碳水化合物';
+            } else if (input.id === 'food-amount') {
+                label = '摄入量';
             }
 
             // Open numpad for this input
@@ -192,6 +297,195 @@ function checkNutritionTargets() {
         noTargetWarning.style.display = 'none';
         return true;
     }
+}
+
+/**
+ * 加载食物库选项到下拉菜单
+ */
+function loadFoodLibraryOptions() {
+    // 获取用户自定义食物库
+    const userFoodLibrary = JSON.parse(localStorage.getItem('foodLibrary')) || [];
+
+    // 合并预定义食物库和用户自定义食物库
+    const combinedFoodLibrary = [...defaultFoodLibrary, ...userFoodLibrary];
+
+    // 清空下拉菜单（保留第一个默认选项）
+    while (foodSelect.options.length > 1) {
+        foodSelect.remove(1);
+    }
+
+    // 如果合并后的食物库为空，显示提示信息
+    if (combinedFoodLibrary.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '-- 食物库为空，请先添加食物 --';
+        option.disabled = true;
+        foodSelect.appendChild(option);
+        return;
+    }
+
+    // 添加食物到下拉菜单
+    combinedFoodLibrary.forEach(food => {
+        const option = document.createElement('option');
+        option.value = food.id;
+        option.textContent = food.name + (food.isDefault ? ' (预定义)' : '');
+        option.setAttribute('data-unit', food.unit);
+        option.setAttribute('data-base', food.nutritionBase);
+        option.setAttribute('data-protein', food.protein);
+        option.setAttribute('data-fat', food.fat);
+        option.setAttribute('data-carbs', food.carbs);
+        option.setAttribute('data-calories', food.calories);
+        option.setAttribute('data-is-default', food.isDefault ? 'true' : 'false');
+        foodSelect.appendChild(option);
+    });
+}
+
+/**
+ * 更新营养成分预览
+ */
+function updateNutritionPreview() {
+    // 获取选中的食物
+    const selectedOption = foodSelect.options[foodSelect.selectedIndex];
+
+    // 如果没有选中食物，清空预览
+    if (!selectedOption || !selectedOption.value) {
+        previewProtein.textContent = '0';
+        previewFat.textContent = '0';
+        previewCarbs.textContent = '0';
+        previewCalories.textContent = '0';
+        foodUnit.textContent = '克';
+        return;
+    }
+
+    // 获取食物单位
+    const unit = selectedOption.getAttribute('data-unit') || '克';
+    foodUnit.textContent = unit;
+
+    // 获取营养基准（1或100）
+    const nutritionBase = parseInt(selectedOption.getAttribute('data-base')) || 100;
+
+    // 获取营养成分
+    const baseProtein = parseFloat(selectedOption.getAttribute('data-protein')) || 0;
+    const baseFat = parseFloat(selectedOption.getAttribute('data-fat')) || 0;
+    const baseCarbs = parseFloat(selectedOption.getAttribute('data-carbs')) || 0;
+    const baseCalories = parseFloat(selectedOption.getAttribute('data-calories')) || 0;
+
+    // 获取摄入量
+    const amount = parseFloat(foodAmount.value) || 0;
+
+    // 计算实际营养成分
+    let protein, fat, carbs, calories;
+
+    if (nutritionBase === 1) {
+        // 如果基准是1单位，直接乘以摄入量
+        protein = baseProtein * amount;
+        fat = baseFat * amount;
+        carbs = baseCarbs * amount;
+        calories = baseCalories * amount;
+    } else {
+        // 如果基准是100单位，需要除以100再乘以摄入量
+        protein = (baseProtein / 100) * amount;
+        fat = (baseFat / 100) * amount;
+        carbs = (baseCarbs / 100) * amount;
+        calories = (baseCalories / 100) * amount;
+    }
+
+    // 更新预览
+    previewProtein.textContent = protein.toFixed(1);
+    previewFat.textContent = fat.toFixed(1);
+    previewCarbs.textContent = carbs.toFixed(1);
+    previewCalories.textContent = Math.round(calories);
+}
+
+/**
+ * 从食物库添加食物
+ */
+function addFoodFromLibrary() {
+    // 获取选中的食物
+    const selectedOption = foodSelect.options[foodSelect.selectedIndex];
+
+    // 如果没有选中食物，显示错误
+    if (!selectedOption || !selectedOption.value) {
+        alert('请选择一个食物');
+        return;
+    }
+
+    // 获取食物名称
+    const foodName = selectedOption.textContent;
+
+    // 获取食物单位
+    const unit = selectedOption.getAttribute('data-unit') || '克';
+
+    // 获取营养基准（1或100）
+    const nutritionBase = parseInt(selectedOption.getAttribute('data-base')) || 100;
+
+    // 获取基础营养成分
+    const baseProtein = parseFloat(selectedOption.getAttribute('data-protein')) || 0;
+    const baseFat = parseFloat(selectedOption.getAttribute('data-fat')) || 0;
+    const baseCarbs = parseFloat(selectedOption.getAttribute('data-carbs')) || 0;
+    const baseCalories = parseFloat(selectedOption.getAttribute('data-calories')) || 0;
+
+    // 获取摄入量
+    const amount = parseFloat(foodAmount.value) || 0;
+
+    // 检查摄入量是否有效
+    if (amount <= 0) {
+        alert('请输入有效的摄入量');
+        return;
+    }
+
+    // 计算实际营养成分
+    let protein, fat, carbs, calories;
+
+    if (nutritionBase === 1) {
+        // 如果基准是1单位，直接乘以摄入量
+        protein = baseProtein * amount;
+        fat = baseFat * amount;
+        carbs = baseCarbs * amount;
+        calories = baseCalories * amount;
+    } else {
+        // 如果基准是100单位，需要除以100再乘以摄入量
+        protein = (baseProtein / 100) * amount;
+        fat = (baseFat / 100) * amount;
+        carbs = (baseCarbs / 100) * amount;
+        calories = (baseCalories / 100) * amount;
+    }
+
+    const date = dateSelect.value;
+
+    // 创建食物条目名称，包含摄入量和单位
+    const entryName = `${foodName} (${amount}${unit})`;
+
+    // Get current time
+    const now = new Date();
+    const timestamp = now.getTime();
+    const timeString = now.toLocaleTimeString();
+
+    // Create food entry object
+    const foodEntry = {
+        id: timestamp, // Use timestamp as unique ID
+        name: entryName,
+        protein: protein,
+        fat: fat,
+        carbs: carbs,
+        calories: Math.round(calories),
+        date: date,
+        time: timeString,
+        timestamp: timestamp
+    };
+
+    // Save to localStorage
+    saveFoodEntry(foodEntry);
+
+    // Update UI by reloading all entries
+    loadFoodEntries(date);
+
+    // Update totals and summary
+    updateTotals();
+    updateDailySummary();
+
+    // 清空输入字段
+    clearLibraryInputs();
 }
 
 /**
