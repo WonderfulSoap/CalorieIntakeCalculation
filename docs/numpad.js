@@ -65,8 +65,27 @@ class Numpad {
         const keys = document.createElement('div');
         keys.className = 'numpad-keys';
 
-        // Create number keys
-        for (let i = 1; i <= 9; i++) {
+        // Create number keys in phone keypad layout (7-8-9, 4-5-6, 1-2-3)
+        // First row: 7-8-9
+        for (let i = 7; i <= 9; i++) {
+            const key = document.createElement('button');
+            key.className = 'numpad-key';
+            key.textContent = i;
+            key.addEventListener('click', () => this.addDigit(i));
+            keys.appendChild(key);
+        }
+
+        // Second row: 4-5-6
+        for (let i = 4; i <= 6; i++) {
+            const key = document.createElement('button');
+            key.className = 'numpad-key';
+            key.textContent = i;
+            key.addEventListener('click', () => this.addDigit(i));
+            keys.appendChild(key);
+        }
+
+        // Third row: 1-2-3
+        for (let i = 1; i <= 3; i++) {
             const key = document.createElement('button');
             key.className = 'numpad-key';
             key.textContent = i;
